@@ -16,5 +16,11 @@ func main() {
 	router.GET("/os", func(c *gin.Context) {
 		c.String(200, runtime.GOOS)
 	})
+
+	router.GET("/echo/:val", func(c *gin.Context) {
+		val := c.Param("val")
+		c.String(200, val)
+	})
+
 	router.Run(":8000")
 }
