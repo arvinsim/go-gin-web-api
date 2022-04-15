@@ -1,10 +1,13 @@
 version: "3.9"
 services:
   database:
-    build:
-      context: ./db
+    image: postgres
     restart: always
     environment:
+      - POSTGRES_DB=mydb
+      - POSTGRES_USER=metheuser
       - POSTGRES_PASSWORD=mysecretpassword
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/create_tables.sql
     ports:
       - "5432:5432"
