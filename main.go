@@ -22,5 +22,15 @@ func main() {
 		c.String(200, val)
 	})
 
+	router.GET("/items/all", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "hoohaa",
+			"data": gin.H{
+				"id":   1,
+				"name": "Car",
+			},
+		})
+	})
+
 	router.Run(":8000")
 }
