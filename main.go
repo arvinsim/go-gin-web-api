@@ -14,6 +14,7 @@ type Item struct {
 }
 
 func main() {
+	// Setup database
 	dsn := "host=localhost user=metheuser password=mysecretpassword dbname=mydb port=5432"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -39,10 +40,10 @@ func main() {
 
 	router.GET("/items/all", func(c *gin.Context) {
 		var items []Item
-		result := db.Find(&items)
+		db.Find(&items)
 
 		c.JSON(200, gin.H{
-			"data": result,
+			"data": items,
 		})
 	})
 
