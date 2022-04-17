@@ -1,11 +1,26 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"runtime"
 )
 
+type Item struct {
+	gorm.Model
+	Name string
+}
+
 func main() {
+	dsn := "host=localhost user=metheuser password=mysecretpassword dbname=mydb port=5432"
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		fmt.Println("There is an error connecting to the database")
+	}
+
+	// Setup Router
 	router := gin.Default()
 	router.GET("/hello", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -23,12 +38,11 @@ func main() {
 	})
 
 	router.GET("/items/all", func(c *gin.Context) {
+		var items []Item
+		result := db.Find(&items)
+
 		c.JSON(200, gin.H{
-			"message": "hoohaa",
-			"data": gin.H{
-				"id":   1,
-				"name": "Car",
-			},
+			"data": result,
 		})
 	})
 
