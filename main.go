@@ -68,11 +68,9 @@ func main() {
 		})
 
 		// Update item
-		itemsGroup.PUT("/", func(c *gin.Context) {
-			id := c.PostForm("id")
+		itemsGroup.PUT("/:id", func(c *gin.Context) {
+			id := c.Param("id")
 			name := c.PostForm("name")
-			//item := models.Item{ID: id, Name: name}
-			//result := models.DB.Save(&item)
 
 			result := models.DB.Model(&models.Item{}).Where("id = ?", id).Update("name", name)
 
