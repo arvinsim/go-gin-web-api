@@ -28,38 +28,51 @@ func main() {
 		c.String(http.StatusOK, val)
 	})
 
-	// Get all items
-	router.GET("/items/all", func(c *gin.Context) {
-		var items []models.Item
-		result := models.DB.Find(&items)
+	itemsGroup := router.Group("/items")
+	{
+		// Get all items
+		itemsGroup.GET("/", func(c *gin.Context) {
+			var items []models.Item
+			result := models.DB.Find(&items)
 
-		httpCode := http.StatusOK
-		if result.Error != nil {
-			httpCode = http.StatusBadRequest
-		}
+			httpCode := http.StatusOK
+			if result.Error != nil {
+				httpCode = http.StatusBadRequest
+			}
 
-		c.JSON(httpCode, gin.H{
-			"data":         items,
-			"rowsAffected": result.RowsAffected,
+			c.JSON(httpCode, gin.H{
+				"data":         items,
+				"rowsAffected": result.RowsAffected,
+			})
 		})
-	})
 
-	// Add item
-	router.POST("/items/add", func(c *gin.Context) {
-		name := c.PostForm("name")
-		item := models.Item{Name: name}
-		result := models.DB.Select("Name").Create(&item)
+		// TODO: Get specific item
+		itemsGroup.GET("/:id", func(context *gin.Context) {
+		})
 
-		httpCode := http.StatusOK
-		message := fmt.Sprintf("The item %s was created", name)
+		// Add item
+		itemsGroup.POST("/", func(c *gin.Context) {
+			name := c.PostForm("name")
+			item := models.Item{Name: name}
+			result := models.DB.Select("Name").Create(&item)
 
-		if result.Error != nil {
-			httpCode = http.StatusBadRequest
-			message = fmt.Sprintf("There was an error creating item %s", name)
-		}
+			httpCode := http.StatusOK
+			message := fmt.Sprintf("The item %s was created", name)
 
-		c.String(httpCode, message)
-	})
+			if result.Error != nil {
+				httpCode = http.StatusBadRequest
+				message = fmt.Sprintf("There was an error creating item %s", name)
+			}
+
+			c.String(httpCode, message)
+		})
+
+		// TODO: Update item
+		itemsGroup.PUT("/", func(context *gin.Context) {})
+
+		// TODO: Delete item
+		itemsGroup.DELETE("/:id", func(context *gin.Context) {})
+	}
 
 	router.Run(":8000")
 }

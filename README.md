@@ -7,5 +7,5 @@
   - Get sample data from database
   - Implement proper database migration
   - Implement proper way to globalise DB object
-- Define API using Swagger v3
+- Define API using Swagger v2
 - Call a Lambda function
