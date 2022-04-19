@@ -100,8 +100,21 @@ func main() {
 			c.String(httpCode, message)
 		})
 
-		// TODO: Delete item
-		itemsGroup.DELETE("/:id", func(context *gin.Context) {})
+		// Delete item
+		itemsGroup.DELETE("/:id", func(c *gin.Context) {
+			id := c.Param("id")
+
+			result := models.DB.Delete(&models.Item{}, id)
+
+			httpCode := http.StatusOK
+			message := fmt.Sprintf("The item with id %s was deleted", id)
+			if result.Error != nil {
+				httpCode = http.StatusBadRequest
+				message = fmt.Sprintf("There was an error deleting item with id %s", id)
+			}
+
+			c.String(httpCode, message)
+		})
 	}
 
 	router.Run(":8000")
