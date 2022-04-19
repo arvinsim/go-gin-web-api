@@ -46,8 +46,24 @@ func main() {
 			})
 		})
 
-		// TODO: Get specific item
-		itemsGroup.GET("/:id", func(context *gin.Context) {
+		// Get specific item
+		itemsGroup.GET("/:id", func(c *gin.Context) {
+			var item models.Item
+			id := c.Param("id")
+
+			result := models.DB.Model(&models.Item{}).Where("id = ?", id).Take(&item)
+
+			httpCode := http.StatusOK
+			if result.Error != nil {
+				httpCode = http.StatusBadRequest
+				message := fmt.Sprintf("There was an error retrieving item with id %s", id)
+				c.String(httpCode, message)
+				return
+			}
+
+			c.JSON(httpCode, gin.H{
+				"data": item,
+			})
 		})
 
 		// Add item
