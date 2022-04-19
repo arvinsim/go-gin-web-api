@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"go-gin-web-api/models"
 	"net/http"
-	"runtime"
 )
 
 func main() {
@@ -13,19 +12,10 @@ func main() {
 
 	// Setup Router
 	router := gin.Default()
-	router.GET("/hello", func(c *gin.Context) {
+	router.GET("/*hello", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Hello World!",
 		})
-	})
-
-	router.GET("/os", func(c *gin.Context) {
-		c.String(http.StatusOK, runtime.GOOS)
-	})
-
-	router.GET("/echo/:val", func(c *gin.Context) {
-		val := c.Param("val")
-		c.String(http.StatusOK, val)
 	})
 
 	itemsGroup := router.Group("/items")
