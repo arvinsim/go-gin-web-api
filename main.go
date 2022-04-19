@@ -67,8 +67,24 @@ func main() {
 			c.String(httpCode, message)
 		})
 
-		// TODO: Update item
-		itemsGroup.PUT("/", func(context *gin.Context) {})
+		// Update item
+		itemsGroup.PUT("/", func(c *gin.Context) {
+			id := c.PostForm("id")
+			name := c.PostForm("name")
+			//item := models.Item{ID: id, Name: name}
+			//result := models.DB.Save(&item)
+
+			result := models.DB.Model(&models.Item{}).Where("id = ?", id).Update("name", name)
+
+			httpCode := http.StatusOK
+			message := fmt.Sprintf("The item %s with id %s was updated", name, id)
+			if result.Error != nil {
+				httpCode = http.StatusBadRequest
+				message = fmt.Sprintf("There was an error saving item %s with id %s", name, id)
+			}
+
+			c.String(httpCode, message)
+		})
 
 		// TODO: Delete item
 		itemsGroup.DELETE("/:id", func(context *gin.Context) {})
