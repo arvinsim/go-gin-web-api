@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"go-gin-web-api/models"
+	"log"
 	"net/http"
 )
 
@@ -12,12 +13,37 @@ func main() {
 
 	// Setup Router
 	router := gin.Default()
-	router.GET("/*hello", func(c *gin.Context) {
+	router.GET("/hello", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Hello World!",
 		})
 	})
 
+	// Set a lower memory limit for multipart forms (default is 32 MiB)
+	router.MaxMultipartMemory = 8 << 20 // 8 MiB
+
+	// Upload file
+	router.POST("/upload", func(c *gin.Context) {
+		// Single file
+		file, err := c.FormFile("file")
+		if err != nil {
+			c.String(http.StatusBadRequest, fmt.Sprintf("file err : %s", err.Error()))
+			return
+		}
+		log.Println(file.Filename)
+
+		// Upload the file to specific dst.
+		result := c.SaveUploadedFile(file, "./uploaded_files/")
+		log.Println(result)
+		if result.Error != nil {
+			c.String(http.StatusBadRequest, fmt.Sprintf("There was a problem trying to upload '%s'", file.Filename))
+			return
+		}
+
+		c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
+	})
+
+	// Items endpoints
 	itemsGroup := router.Group("/items")
 	{
 		// Get all items
