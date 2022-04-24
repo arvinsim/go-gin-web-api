@@ -6,6 +6,7 @@ import (
 	"go-gin-web-api/models"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -17,6 +18,16 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Hello World!",
 		})
+	})
+
+	// Returns what the build environment is
+	router.GET("/environment", func(c *gin.Context) {
+		environment := os.Getenv("BUILD_ENVIRONMENT")
+		if environment == "" {
+			c.String(http.StatusOK, "The build environment is not set")
+		} else {
+			c.String(http.StatusOK, fmt.Sprintf("The build environment is set to %s", environment))
+		}
 	})
 
 	// Set a lower memory limit for multipart forms (default is 32 MiB)
