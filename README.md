@@ -1,11 +1,18 @@
 # Go Gin Web API
 
-## Goals
+## Experiments
 
-- Connect Gin with Postgres
-  - Create initialization script for creating and seeding tables
-  - Get sample data from database
-  - Implement proper database migration
-  - Implement proper way to globalise DB object
-- Define API using Swagger v2
-- Call a Lambda function
+### Connect Gin with Postgres
+- Create initialization script for creating and seeding tables
+- Get sample data from database
+- Implement proper database migration
+- Implement proper way to globalise DB object
+ 
+### Process an uploaded image via 2 microservices
+- Upload image to Gin endpoint
+- Create microservices
+  - Convert image to png via [imaging](https://github.com/disintegration/imaging)
+  - Add watermark to image
+- Connect via a message queue or rpc
+
+### Connect Gin with NoSQL

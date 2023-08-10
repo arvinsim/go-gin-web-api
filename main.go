@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"go-gin-web-api/models"
+	"log"
 	"net/http"
-	"runtime"
 )
 
 func main() {
@@ -19,15 +19,31 @@ func main() {
 		})
 	})
 
-	router.GET("/os", func(c *gin.Context) {
-		c.String(http.StatusOK, runtime.GOOS)
+	// Set a lower memory limit for multipart forms (default is 32 MiB)
+	router.MaxMultipartMemory = 8 << 20 // 8 MiB
+
+	// Upload file
+	router.POST("/upload", func(c *gin.Context) {
+		// Single file
+		file, err := c.FormFile("file")
+		if err != nil {
+			c.String(http.StatusBadRequest, fmt.Sprintf("file err : %s", err.Error()))
+			return
+		}
+		log.Println(file.Filename)
+
+		// Upload the file to specific dst.
+		result := c.SaveUploadedFile(file, "./uploaded_files/")
+		log.Println(result)
+		if result.Error != nil {
+			c.String(http.StatusBadRequest, fmt.Sprintf("There was a problem trying to upload '%s'", file.Filename))
+			return
+		}
+
+		c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
 	})
 
-	router.GET("/echo/:val", func(c *gin.Context) {
-		val := c.Param("val")
-		c.String(http.StatusOK, val)
-	})
-
+	// Items endpoints
 	itemsGroup := router.Group("/items")
 	{
 		// Get all items
@@ -46,8 +62,24 @@ func main() {
 			})
 		})
 
-		// TODO: Get specific item
-		itemsGroup.GET("/:id", func(context *gin.Context) {
+		// Get specific item
+		itemsGroup.GET("/:id", func(c *gin.Context) {
+			var item models.Item
+			id := c.Param("id")
+
+			result := models.DB.Model(&models.Item{}).Where("id = ?", id).Take(&item)
+
+			httpCode := http.StatusOK
+			if result.Error != nil {
+				httpCode = http.StatusBadRequest
+				message := fmt.Sprintf("There was an error retrieving item with id %s", id)
+				c.String(httpCode, message)
+				return
+			}
+
+			c.JSON(httpCode, gin.H{
+				"data": item,
+			})
 		})
 
 		// Add item
@@ -67,12 +99,10 @@ func main() {
 			c.String(httpCode, message)
 		})
 
-		// TODO: Update item
-		itemsGroup.PUT("/", func(c *gin.Context) {
-			id := c.PostForm("id")
+		// Update item
+		itemsGroup.PUT("/:id", func(c *gin.Context) {
+			id := c.Param("id")
 			name := c.PostForm("name")
-			//item := models.Item{ID: id, Name: name}
-			//result := models.DB.Save(&item)
 
 			result := models.DB.Model(&models.Item{}).Where("id = ?", id).Update("name", name)
 
@@ -86,8 +116,21 @@ func main() {
 			c.String(httpCode, message)
 		})
 
-		// TODO: Delete item
-		itemsGroup.DELETE("/:id", func(context *gin.Context) {})
+		// Delete item
+		itemsGroup.DELETE("/:id", func(c *gin.Context) {
+			id := c.Param("id")
+
+			result := models.DB.Delete(&models.Item{}, id)
+
+			httpCode := http.StatusOK
+			message := fmt.Sprintf("The item with id %s was deleted", id)
+			if result.Error != nil {
+				httpCode = http.StatusBadRequest
+				message = fmt.Sprintf("There was an error deleting item with id %s", id)
+			}
+
+			c.String(httpCode, message)
+		})
 	}
 
 	router.Run(":8000")
